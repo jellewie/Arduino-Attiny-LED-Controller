@@ -16,7 +16,7 @@ I1 - Turns RED LEDs on
 I2 - Turns GREEN LEDs on
 I3 - Turns BLUE LEDs on
 
-I4 - Animation blink (like a turn signal)
-I5 - Animation Flash
-I4+I5 - Animation Flash other way
+I4 - Animation blink (Like a turn signal)
+I5 - Animation Flash (Just flashing everything)
+I4+I5 - Animation Move (Moves LEDs around)
 !I4&!I5 - just steady on
