@@ -9,12 +9,12 @@ static const byte PDI_Red = 1;                                      //turn RED L
 static const byte PDI_Green = 2;                                    //turn Green LEDs on
 static const byte PDI_Blue = 3;                                     //turn Blue LEDs on
 static const byte PDI_Blink = 4;                                    //animation = Blinking like a turn signal
-static const byte PDI_Flash = 5;                                    //animation = Just flash all together (else (&!^) just steady color)
+static const byte PDI_Flash = 0;                                    //animation = Just flash all together (else (&!^) just steady color)  (THIS IS THE ANALOG PIN NUMBER)
 //Just some configurable things
-static const int TotalLEDs = 10;
+static const int TotalLEDs = 40;
 const static byte DelayAnimationBlink = 50;                         //Delay in ms for an update in the animation (minimum time)
-const static byte DelayAnimationFlash = 200;                        //^^
-const static byte DelayAnimationMove = 15;                          //^^
+const static byte DelayAnimationFlash = 250;                        //^^
+const static byte DelayAnimationMove = 30;                          //^^
 //Just some numbers we need to transfer around..
 CRGB LEDs[TotalLEDs];                                               //This is an array of LEDs. One item for each LED in your strip.
 void setup() {                                                      //This code runs once on start-up
@@ -25,7 +25,7 @@ void setup() {                                                      //This code 
   pinMode(PDI_Blink,  INPUT);                                       //^^
   pinMode(PDI_Flash,  INPUT);                                       //^^
   FastLED.addLeds<WS2812B, PAO_LED, GRB>(LEDs, TotalLEDs);          //Set the LED type and such
-  FastLED.setBrightness(80);                                        //Scale brightness
+  FastLED.setBrightness(10);                                        //Scale brightness
   fill_solid(&(LEDs[0]), TotalLEDs, CRGB(0, 0, 0));                 //Set the whole LED strip to be off (Black)
   FastLED.show();                                                   //Update
 }
@@ -47,8 +47,8 @@ void loop() {                                                       //Keep loopi
     Green = 255;                                                    //^^
   if (digitalRead(PDI_Blue) == HIGH)                                //^^^^
     Blue = 255;                                                     //^^^^
-  if (digitalRead(PDI_Blink) == HIGH) {                             //If the LEDs need to show an animation
-    if (digitalRead(PDI_Flash) == HIGH) {
+  if (digitalRead(PDI_Blink) == HIGH) {                             //If the LEDs need to show an animation    
+    if (analogRead(PDI_Flash) >= 900) {
       if (Mode != 3) {                                              //If we just moved into this Mode (and are not yet in the correct state)
         Mode = 3;                                                   //Set this Mode
         fill_solid(&(LEDs[0]), TotalLEDs, CRGB(0, 0, 0));           //Set the whole LED strip to be off (Black)
@@ -56,7 +56,7 @@ void loop() {                                                       //Keep loopi
       }
       static int CounterMove = 0;                                   //Create a counter (To store the position in)
       static byte MoveAmount = 2;                                   //Quantity of the sections
-      static byte LengthMove = 2;                                   //Length of the sections
+      static byte LengthMove = 5;                                   //Length of the sections
       int OffsetMove = TotalLEDs / MoveAmount;                      //Calculation for calculating offset from first Position
       int poss[MoveAmount];                                         //Array for saving the positions of the sections
       if (CounterMove >= TotalLEDs) {                               //Will check if the main position is bigger than the total
@@ -64,6 +64,7 @@ void loop() {                                                       //Keep loopi
       } else {
         EVERY_N_MILLISECONDS(DelayAnimationMove) {                  //Do every 'DelayAnimationBlink' ms
           CounterMove++;                                            //It will just set it to 0
+          fill_solid(&(LEDs[0]), TotalLEDs, CRGB(0, 0, 0));
           UpdateLEDs = true;                                        //Update
         }
       }
@@ -94,15 +95,15 @@ void loop() {                                                       //Keep loopi
         static byte CounterBlink = 0;                               //Create a counter (storing the amounts of LEDs on)
         static byte LengthBlink = TotalLEDs;                        //Total length of LEDs to blink
         static byte AlwaysOn = 1;                                   //Howmuch LEDs should always be on
-        fill_solid(&(LEDs[0]), LengthBlink,  CRGB(Red, Green, Blue)); //Turn LEDs off
-        fill_solid(&(LEDs[0]), AlwaysOn,     CRGB(Red, Green, Blue)); //Set some LEDs to be always on
-        fill_solid(&(LEDs[0]), CounterBlink, CRGB(Red, Green, Blue)); //Set the counter amount of LEDs on (this will increase)
+        fill_solid(&(LEDs[0]), LengthBlink,  CRGB(0, 0, 0));        //Turn LEDs off
+        fill_solid(&(LEDs[0]), AlwaysOn,     CRGB(Red, Green, Blue));//Set some LEDs to be always on
+        fill_solid(&(LEDs[0]), CounterBlink, CRGB(Red, Green, Blue));//Set the counter amount of LEDs on (this will increase)
         CounterBlink++;                                             //This will make the blink 1 longer each time
         if (CounterBlink > LengthBlink)                             //If we are at max length
           CounterBlink = 0;                                         //Reset counter
       }
     }
-  } else if (digitalRead(PDI_Flash) == HIGH) {                      //If the LEDs need a flashing animation
+  } else if (analogRead(PDI_Flash) >= 900) {                        //If the LEDs need a flashing animation
     if (Mode != 2) {                                                //If we just moved into this Mode (and are not yet in the correct state)
       Mode = 2;                                                     //Set this Mode
       fill_solid(&(LEDs[0]), TotalLEDs, CRGB(0, 0, 0));             //Set the whole LED strip to be off (Black)
@@ -110,13 +111,13 @@ void loop() {                                                       //Keep loopi
     }
     static bool FlashStateOn = false;                               //Create a bool to store the flash state in
     EVERY_N_MILLISECONDS(DelayAnimationFlash) {                     //Do every 'DelayAnimationBlink' ms
-      UpdateLEDs = true;                                            //Update
       FlashStateOn = !FlashStateOn;                                 //Toggle the state
+      if (FlashStateOn)                                             //If the flash needs to be on
+        fill_solid(&(LEDs[0]), TotalLEDs, CRGB(Red, Green, Blue));  //Set the whole LED strip to be the right color
+      else
+        fill_solid(&(LEDs[0]), TotalLEDs, CRGB(0, 0, 0));           //Set the whole LED strip to be off (Black)
+      UpdateLEDs = true;                                            //Update
     }
-    if (FlashStateOn)                                               //If the flash needs to be on
-      fill_solid(&(LEDs[0]), TotalLEDs, CRGB(Red, Green, Blue));    //Set the whole LED strip to be the right color
-    else
-      fill_solid(&(LEDs[0]), TotalLEDs, CRGB(0, 0, 0));             //Set the whole LED strip to be off (Black)
   } else {                                                          //else we just need to show the colors
     Mode = 4;                                                       //Set the Mode
     fill_solid(&(LEDs[0]), TotalLEDs, CRGB(Red, Green, Blue));      //Set the whole LED strip to be off (Black)
