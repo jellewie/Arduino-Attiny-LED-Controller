@@ -20,3 +20,6 @@ I4 - Animation blink (Like a turn signal)
 I5 - Animation Flash (Just flashing everything)
 I4+I5 - Animation Move (Moves LEDs around)
 !I4&!I5 - just steady on
+
+# Manual
+The manual can be find in either as a word document or as PDF, there called "Manual"
