@@ -3,7 +3,7 @@
 */
 
 //Just some configurable things
-const static int TotalLEDs = 100;                                    //The total amounts of LEDs in the strip
+const static int TotalLEDs = 60;                                    //The total amounts of LEDs in the strip
 const static byte DelayAnimationBlink = 50;                         //Delay in ms for an update in the animation (technically the minimum time)
 const static byte DelayAnimationFlash = 250;                        //^^
 const static byte DelayAnimationMove = 20;                          //^^
